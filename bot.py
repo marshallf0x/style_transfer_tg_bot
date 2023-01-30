@@ -2,7 +2,6 @@ import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -11,8 +10,7 @@ import os
 
 from keyboards import *
 from messages import MESSAGES
-
-
+from settings import TOKEN
 
 
 
@@ -90,18 +88,15 @@ async def get_picture_1(message: types.Message):
 async def get_picture_2(message: types.Message):
     await message.photo[-1].download(destination=f"pictures/{message.from_user.id}_2.jpg", make_dirs=True)
     await message.answer(MESSAGES['pic2'])
-    photo = open(f'pictures/{message.from_user.id}_2.jpg', 'rb')
-    #there will be transfer
+    os.system(f'style_transfer pictures/{message.from_user.id}_1.jpg pictures/{message.from_user.id}_2.jpg -o pictures/{message.from_user.id}_result.jpg --devices cuda:0')
+    photo = open(f'pictures/{message.from_user.id}_result.jpg', 'rb')
     await message.answer_photo(photo, caption=MESSAGES['result'])
     os.remove(f"pictures/{message.from_user.id}_1.jpg")
     os.remove(f"pictures/{message.from_user.id}_2.jpg")
+    os.remove(f"pictures/{message.from_user.id}_result.jpg")
     await message.answer(MESSAGES['begin'])
     await UserState.reg.set()
 
-
-#@dp.message_handler()
-#async def echo_message(msg: types.Message):
-#    await bot.send_message(msg.from_user.id, msg.text)
 
 
 if __name__ == '__main__':
